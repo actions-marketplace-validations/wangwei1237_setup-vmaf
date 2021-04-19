@@ -17,6 +17,7 @@ outputs:
   time: # output will be available to future steps
     description: 'The message to output'
   name:
+    description: 'The message to output'
 runs:
   using: 'node12'
   main: 'dist/index.js'
