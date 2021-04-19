@@ -5954,6 +5954,14 @@ module.exports = wait;
 
 /***/ }),
 
+/***/ 73:
+/***/ ((module) => {
+
+module.exports = eval("require")("@actions/exec");
+
+
+/***/ }),
+
 /***/ 756:
 /***/ ((module) => {
 
@@ -6107,6 +6115,7 @@ var __webpack_exports__ = {};
 (() => {
 const core = __nccwpck_require__(864);
 const github = __nccwpck_require__(366);
+const exec = __nccwpck_require__(73);
 const wait = __nccwpck_require__(46);
 
 
