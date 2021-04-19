@@ -6122,6 +6122,23 @@ async function run() {
       // Get the JSON webhook payload for the event that triggered the workflow
       const payload = JSON.stringify(github.context.payload, undefined, 2)
       console.log(`The event payload: ${payload}`);
+
+      core.startGroup('Install dependencies');
+      await exec.exec(`python -m pip install --upgrade pip`);
+      await exec.exec(`pip install meson`);
+      await exec.exec('sudo apt-get update');
+      await exec.exec('sudo -E apt-get -yq install ccache ninja-build');
+      await exec.exec('sudo -E apt-get -yq install gcc g++ nasm');
+      core.endGroup();
+
+      core.startGroup('Download source code');
+      await exec.exec(`git clone https://github.com/Netflix/vmaf.git --branch  master --depth 1`);
+      core.endGroup();
+
+      core.startGroup('Compile and install');
+      await exec.exec(`ls -R .`);
+      core.endGroup();
+
     } catch (error) {
       core.setFailed(error.message);
     }
