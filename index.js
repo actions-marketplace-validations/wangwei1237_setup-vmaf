@@ -33,7 +33,7 @@ async function run() {
       const vmafPrefixPath = './libvmaf';
       const vmafBuildPath  = './vmaf/libvmaf/build';
       core.startGroup('Compile and install');
-      await exec.exec(`meson setup vmaf/libvmaf/build vmaf/libvmaf --prefix=$(pwd)/libvmaf`);
+      await exec.exec(`meson setup vmaf/libvmaf/build vmaf/libvmaf --prefix=/home/runner/work/setup-vmaf/setup-vmaf/libvmaf`);
       await exec.exec(`ninja -vC vmaf/libvmaf/build install`);
       await exec.exec(`ls -R .`);
       core.endGroup();
