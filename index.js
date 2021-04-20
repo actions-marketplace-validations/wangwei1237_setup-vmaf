@@ -1,7 +1,24 @@
-const cache  = require('@actions/tool-cache');
-const core   = require('@actions/core');
-const exec   = require('@actions/exec');
-const os     = require('os')
+const cache   = require('@actions/tool-cache');
+const core    = require('@actions/core');
+const exec    = require('@actions/exec');
+const octokit = require('@octokit/rest');
+const os      = require('os')
+const { Octokit } = require("@octokit/rest");
+
+async function find(os, arch, options = {}) {
+    const owner   = 'wangwei1237';
+    const repo    = 'setup-vmaf';
+
+    const octokit = new Octokit();
+    const response = await octokit.repos.listReleases({ owner, repo });
+    const release = response.data.find(({ tag_name }) => tag_name.startsWith('libvmaf-'));
+    console.log('release-----------' + release.tag_name);
+    return {
+        release,
+        version1: release.tag_name,
+        url: `https://github.com/${owner}/${repo}/releases/download/${release.tag_name}/libvmaf-${os}-${arch}.tar.gz`,
+    };
+}
 
 // most @actions toolkit packages have async methods
 async function run() {
@@ -11,6 +28,9 @@ async function run() {
       const version  = core.getInput('version');
       const prefix   = core.getInput('prefix');
 
+      console.log(platform + ',' + arch);
+      const {version1, url} = await find(platform, arch);
+      console.log('xsssss' + version1 + ',' + url);
 
       core.startGroup('Install dependencies');
       await exec.exec(`echo ${platform} ${arch}`);

@@ -2,9 +2,9 @@ name: 'Setup VMAF'
 description: 'Setup VMAF'
 inputs:
   version: 
-    description: 'version of the vmaf, must be master branch or tags.'
+    description: 'version of the vmaf, must be tags.'
     required: false
-    default: 'master'
+    default: 'v2.1.1'
   prefix:
     description: 'the prefix to install the vmaf'
     required: false

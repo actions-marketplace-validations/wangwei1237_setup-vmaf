@@ -1,0 +1,114 @@
+name: libvmaf
+on:
+  push:
+  pull_request:
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  libvmaf-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-18.04
+            CC: ccache gcc
+            CXX: ccache g++
+            version: master
+          - os: ubuntu-18.04
+            CC: ccache gcc-9
+            CXX: ccache g++-9
+            version: master
+          - os: ubuntu-18.04
+            CC: ccache clang
+            CXX: ccache clang++
+            version: master
+          - os: macos-10.15
+            CC: ccache clang
+            CXX: ccache clang++
+            version: master
+            experimental: true
+    runs-on: ${{ matrix.os }}
+    env:
+      CC: ${{ matrix.CC }}
+      CXX: ${{ matrix.CXX }}
+    steps:
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install meson and ninja
+        run: |
+          python -m pip install --upgrade pip
+          pip install meson
+
+      - name: Install dependencies (ubuntu)
+        if: matrix.os == 'ubuntu-18.04'
+        run: |
+          sudo apt-get update
+          sudo -E apt-get -yq install ccache ninja-build
+          case "$CC" in
+          *gcc) sudo -E apt-get -yq install gcc g++ nasm ;;
+          *gcc-9)
+            sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
+            sudo -E apt-get -yq install gcc-9 g++-9 nasm
+            ;;
+          *clang) sudo -E apt-get -yq install clang nasm ;;
+          esac
+          $CC --version
+          meson --version
+          ccache --version
+
+      - name: Install dependencies (mac)
+        if: matrix.os == 'macos-10.15'
+        run: |
+          brew install -q ninja nasm ccache
+
+          $CC --version
+          meson --version
+          ccache --version
+      
+      - name: get vmaf source 
+        working-directory: ${{github.workspace}}
+        run: | 
+          /usr/bin/git clone https://github.com/Netflix/vmaf.git vmaf
+      
+      #- name: Run meson
+      #  working-directory: ${{github.workspace}}
+      #  run: |
+      #    meson setup vmaf/libvmaf/build vmaf/libvmaf --buildtype release --prefix ${{github.workspace}}/libvmaf -Denable_float=true
+      
+      #- name: Run ninja
+      #  working-directory: ${{github.workspace}}
+      #  run: |
+      #    sudo ninja -vC vmaf/libvmaf/build install
+      
+      - name: package the libvmaf
+        working-directory: ${{github.workspace}}
+        run: |
+          sudo mkdir libvmaf
+          tar czvf "libvmaf-${{matrix.os}}.tar.gz" libvmaf
+
+      - name: Get binary path & Current Release
+        id: get_info
+        run: |
+          ls -R ${{github.workspace}}/libvmaf
+          echo "::set-output name=path::${{github.workspace}}/libvmaf-${{matrix.os}}.tar.gz"
+          echo "::set-output name=upload_url::$(curl -L https://api.github.com/repos/${{ github.repository }}/releases/tags/libvmaf-${{matrix.version}} | jq -r ."upload_url")"
+
+      - name: Upload vmaf
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os }}-vmaf
+          path: ${{ steps.get_info.outputs.path }}
+      - name: Upload vmaf
+        if: steps.get_info.outputs.upload_url != 'null'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_info.outputs.upload_url }}
+          asset_path: ${{ steps.get_info.outputs.path }}
+          asset_name: vmaf
+          asset_content_type: application/octet-stream
