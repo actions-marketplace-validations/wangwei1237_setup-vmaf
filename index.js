@@ -1,4 +1,4 @@
-const cache  = require('@actions/cache');
+const cache  = require('@actions/tool-cache');
 const core   = require('@actions/core');
 const exec   = require('@actions/exec');
 const os     = require('os')
