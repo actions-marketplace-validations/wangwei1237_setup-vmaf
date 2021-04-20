@@ -22,4 +22,4 @@ then
     upload_url=$(curl -X POST -H "Accept: application/vnd.github.v3+json" "${create_release_url}?access_token=${token}" -d "{\"tag_name\":\"${tag}\", \"name\":\"libvmaf Build for ${version}\"}" | grep 'upload_url' | cut -d'"' -f4)
 fi
 
-echo "::set-output name=upload-url::${upload_url}"
+echo "::set-output name=upload-url::$upload_url"
