@@ -96,7 +96,6 @@ jobs:
       - name: package the libvmaf
         working-directory: ${{ github.workspace }}
         run: |
-          sudo mkdir libvmaf
           tar czvf "libvmaf-${{ matrix.version }}.tar.gz" libvmaf
       
       - uses: actions/upload-release-asset@v1
