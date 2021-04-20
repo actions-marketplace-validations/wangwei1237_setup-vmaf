@@ -14,9 +14,9 @@ get_release_url="${URL_PREFIX}/tags/${tag}"
 upload_url=$(curl -H "Accept: application/vnd.github.v3+json" "${get_release_url}" | grep 'upload_url' | cut -d'"' -f4)
 
 create_release_url="${URL_PREFIX}"
-if [ "$upload_url" == "" ]
+if [ "$upload_url" = "" ]
 then
-    curl -H "Accept: application/vnd.github.v3+json" "${create_release_url}"
+    curl -H "Accept: application/vnd.github.v3+json" "${create_release_url}" -d "{\"tag_name\":\"${tag}\"}"
 fi
 
 echo "-----------${upload_url}"
