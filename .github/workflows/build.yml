@@ -16,7 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: sudo sh ./getuploadurl.sh ${{ github.event.inputs.version }} ${{ secrets.GITHUB_TOKEN }}
-        id: get-upload-url
+        id: upload-url
+    outputs:
+      upload_url: ${{ steps.upload-url.outputs.upload_url }} 
   
   libvmaf-build:
     needs: get-upload-url
@@ -58,7 +60,7 @@ jobs:
       - name: Print upload url
         run: |
           echo "------------------"
-          echo ${{ needs.get-upload-url.get-upload-url.upload-url }}
+          echo ${{ needs.get-upload-url.outputs.upload_url }}
       - name: Setup python
         uses: actions/setup-python@v2
         with:
