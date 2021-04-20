@@ -55,6 +55,10 @@ jobs:
       CC: ${{ matrix.CC }}
       CXX: ${{ matrix.CXX }}
     steps:
+      - name: Print upload url
+        run: |
+          echo "------------------"
+          echo ${{ needs.get-upload-url.get-upload-url.upload-url }}
       - name: Setup python
         uses: actions/setup-python@v2
         with:
