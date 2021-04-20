@@ -1,27 +1,14 @@
 name: 'Setup VMAF'
 description: 'Setup VMAF'
 inputs:
-  version:  # id of input
-    description: 'version'
+  version: 
+    description: 'version of the vmaf, must be master branch or tags.'
     required: false
-    default: ''
-  os:
-    description: 'os'
-    required: false
-    default: ''
-  who-to-greet:  # id of input
-    description: 'Who to greet'
-    required: true
-    default: 'World'
+    default: 'master'
   prefix:
     description: 'the prefix to install the vmaf'
     required: false
     default: ${{github.workspace}}/libvmaf
-outputs:
-  time: # output will be available to future steps
-    description: 'The message to output'
-  name:
-    description: 'The message to output'
 runs:
   using: 'node12'
   main: 'dist/index.js'

@@ -1,50 +1,41 @@
+const cache  = require('@actions/cache');
 const core   = require('@actions/core');
-// const github = require('@actions/github');
 const exec   = require('@actions/exec');
-// const wait   = require('./wait');
-
+const os     = require('os')
 
 // most @actions toolkit packages have async methods
 async function run() {
     try {
-      /*
-      // `who-to-greet` input defined in action metadata file
-      const nameToGreet = core.getInput('who-to-greet');
-      console.log(`Hello ${nameToGreet}!`);
-      const time = (new Date()).toTimeString();
-      core.setOutput("time", time);
-      core.setOutput("name", nameToGreet);
-      // Get the JSON webhook payload for the event that triggered the workflow
-      const payload = JSON.stringify(github.context.payload, undefined, 2)
-      console.log(`The event payload: ${payload}`);
-      */
+      const platform = os.platform();
+      const arch     = os.arch();
+      const version  = core.getInput('version');
+      const prefix   = core.getInput('prefix');
 
-      const prefix = core.getInput('prefix');
 
       core.startGroup('Install dependencies');
-      await exec.exec(`python -m pip install --upgrade pip`);
-      await exec.exec(`pip install meson`);
-      await exec.exec('sudo apt-get update');
-      await exec.exec('sudo -E apt-get -yq install ccache ninja-build');
-      await exec.exec('sudo -E apt-get -yq install gcc g++ nasm');
+      await exec.exec(`echo ${platform} ${arch}`);
+      // await exec.exec(`python -m pip install --upgrade pip`);
+      // await exec.exec(`pip install meson`);
+      // await exec.exec('sudo apt-get update');
+      // await exec.exec('sudo -E apt-get -yq install ccache ninja-build');
+      // await exec.exec('sudo -E apt-get -yq install gcc g++ nasm');
       core.endGroup();
 
-      core.startGroup('Download source code');
-      await exec.exec(`git clone https://github.com/Netflix/vmaf.git --branch  master --depth 1`);
+      core.startGroup('Download vmaf source code');
+      // await exec.exec(`git clone https://github.com/Netflix/vmaf.git --branch  ${version} --depth 1`);
       core.endGroup();
       
+      core.startGroup('Compile and install');
       const vmafPath       = './vmaf/libvmaf';
       const vmafBuildPath  = './vmaf/libvmaf/build';
-      core.startGroup('Compile and install');
-      const setupCmd = 'meson setup ' + 
-                       vmafBuildPath + ' ' +
-                       vmafPath + ' ' + 
-                       '--prefix=' + prefix;
+      const setupCmd       = 'meson setup ' + 
+                             vmafBuildPath + ' ' +
+                             vmafPath + ' ' + 
+                             '--prefix=' + prefix;
       const installCmd = 'ninja -vC ' + vmafBuildPath + ' install';
-      await exec.exec(setupCmd);
-      await exec.exec(installCmd);
-    
-      await exec.exec('ls -R .');
+      // await exec.exec(setupCmd);
+      // await exec.exec(installCmd);
+      // await exec.exec('ls -R .');
       core.endGroup();
 
     } catch (error) {
