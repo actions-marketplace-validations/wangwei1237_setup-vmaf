@@ -1,12 +1,13 @@
 const core   = require('@actions/core');
-const github = require('@actions/github');
+// const github = require('@actions/github');
 const exec   = require('@actions/exec');
-const wait   = require('./wait');
+// const wait   = require('./wait');
 
 
 // most @actions toolkit packages have async methods
 async function run() {
     try {
+      /*
       // `who-to-greet` input defined in action metadata file
       const nameToGreet = core.getInput('who-to-greet');
       console.log(`Hello ${nameToGreet}!`);
@@ -16,6 +17,9 @@ async function run() {
       // Get the JSON webhook payload for the event that triggered the workflow
       const payload = JSON.stringify(github.context.payload, undefined, 2)
       console.log(`The event payload: ${payload}`);
+      */
+
+      const prefix = core.getInput('prefix');
 
       core.startGroup('Install dependencies');
       await exec.exec(`python -m pip install --upgrade pip`);
@@ -29,14 +33,18 @@ async function run() {
       await exec.exec(`git clone https://github.com/Netflix/vmaf.git --branch  master --depth 1`);
       core.endGroup();
       
-      const vmafPath = './vmaf/libvmaf';
+      const vmafPath       = './vmaf/libvmaf';
       const vmafBuildPath  = './vmaf/libvmaf/build';
       core.startGroup('Compile and install');
-      // await exec.exec(`meson setup vmaf/libvmaf/build vmaf/libvmaf --prefix=/home/runner/work/setup-vmaf/setup-vmaf/libvmaf`);
-      // await exec.exec(`ninja -vC vmaf/libvmaf/build install`);
-      await exec.exec('"meson"', [setup, vmafBuildPath, vmafPath], {'prefix':'/home/runner/work/setup-vmaf/setup-vmaf/libvmaf'});
+      const setupCmd = 'meson setup ' + 
+                       vmafBuildPath + ' ' +
+                       vmafPath + ' ' + 
+                       '--prefix=' + prefix;
+      const installCmd = 'ninja -vC ' + vmafBuildPath + ' install';
+      await exec.exec(setupCmd);
+      await exec.exec(installCmd);
     
-      await exec.exec(`ls -R .`);
+      await exec.exec('ls -R .');
       core.endGroup();
 
     } catch (error) {
