@@ -7299,10 +7299,10 @@ module.exports = require("zlib");;
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-const core = __nccwpck_require__(8864);
+const core   = __nccwpck_require__(8864);
 const github = __nccwpck_require__(6366);
-const exec = __nccwpck_require__(8752);
-const wait = __nccwpck_require__(2046);
+const exec   = __nccwpck_require__(8752);
+const wait   = __nccwpck_require__(2046);
 
 
 // most @actions toolkit packages have async methods
@@ -7330,12 +7330,13 @@ async function run() {
       await exec.exec(`git clone https://github.com/Netflix/vmaf.git --branch  master --depth 1`);
       core.endGroup();
       
-      const vmafRootPath   = './vmaf';
-      const vmafPrefixPath = './libvmaf';
+      const vmafPath = './vmaf/libvmaf';
       const vmafBuildPath  = './vmaf/libvmaf/build';
       core.startGroup('Compile and install');
-      await exec.exec(`meson setup vmaf/libvmaf/build vmaf/libvmaf --prefix=/home/runner/work/setup-vmaf/setup-vmaf/libvmaf`);
-      await exec.exec(`ninja -vC vmaf/libvmaf/build install`);
+      // await exec.exec(`meson setup vmaf/libvmaf/build vmaf/libvmaf --prefix=/home/runner/work/setup-vmaf/setup-vmaf/libvmaf`);
+      // await exec.exec(`ninja -vC vmaf/libvmaf/build install`);
+      await exec.exec('"meson"', [setup, vmafBuildPath, vmafPath], {'prefix':'/home/runner/work/setup-vmaf/setup-vmaf/libvmaf'});
+    
       await exec.exec(`ls -R .`);
       core.endGroup();
 

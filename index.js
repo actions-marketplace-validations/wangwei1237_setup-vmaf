@@ -1,7 +1,7 @@
-const core = require('@actions/core');
+const core   = require('@actions/core');
 const github = require('@actions/github');
-const exec = require('@actions/exec');
-const wait = require('./wait');
+const exec   = require('@actions/exec');
+const wait   = require('./wait');
 
 
 // most @actions toolkit packages have async methods
@@ -29,12 +29,13 @@ async function run() {
       await exec.exec(`git clone https://github.com/Netflix/vmaf.git --branch  master --depth 1`);
       core.endGroup();
       
-      const vmafRootPath   = './vmaf';
-      const vmafPrefixPath = './libvmaf';
+      const vmafPath = './vmaf/libvmaf';
       const vmafBuildPath  = './vmaf/libvmaf/build';
       core.startGroup('Compile and install');
-      await exec.exec(`meson setup vmaf/libvmaf/build vmaf/libvmaf --prefix=/home/runner/work/setup-vmaf/setup-vmaf/libvmaf`);
-      await exec.exec(`ninja -vC vmaf/libvmaf/build install`);
+      // await exec.exec(`meson setup vmaf/libvmaf/build vmaf/libvmaf --prefix=/home/runner/work/setup-vmaf/setup-vmaf/libvmaf`);
+      // await exec.exec(`ninja -vC vmaf/libvmaf/build install`);
+      await exec.exec('"meson"', [setup, vmafBuildPath, vmafPath], {'prefix':'/home/runner/work/setup-vmaf/setup-vmaf/libvmaf'});
+    
       await exec.exec(`ls -R .`);
       core.endGroup();
 
