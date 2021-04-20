@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo sh ./getuploadurl.sh
+      - run: sudo sh ./getuploadurl.sh ${{ github.event.inputs.version }}
         id: get-upload-url
   
   libvmaf-build:
