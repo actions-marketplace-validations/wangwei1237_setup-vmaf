@@ -5,7 +5,7 @@ on:
 
 env:
   DEBIAN_FRONTEND: noninteractive
-
+  VMAFV: v2.1.1
 jobs:
   libvmaf-build:
     strategy:
@@ -15,20 +15,29 @@ jobs:
           - os: ubuntu-18.04
             CC: ccache gcc
             CXX: ccache g++
-            version: master
-          #- os: ubuntu-18.04
-          #  CC: ccache gcc-9
-          #  CXX: ccache g++-9
-          #  version: master
-          #- os: ubuntu-18.04
-          #  CC: ccache clang
-          #  CXX: ccache clang++
-          #  version: master
-          #- os: macos-10.15
-          #  CC: ccache clang
-          #  CXX: ccache clang++
-          #  version: master
-          #  experimental: true
+            version: ubuntu-18.04-gcc
+            osp: ubuntu
+          - os: ubuntu-20.04
+            CC: ccache gcc
+            CXX: ccache g++
+            version: ubuntu-20.04-gcc
+            osp: ubuntu
+          - os: ubuntu-18.04
+            CC: ccache clang
+            CXX: ccache clang++
+            version: ubuntu-18.04-gcc
+            osp: ubuntu
+          - os: ubuntu-20.04
+            CC: ccache clang
+            CXX: ccache clang++
+            verxion: ubuntu-20.04-clang
+            osp: ubuntu
+          - os: macos-10.15
+            CC: ccache clang
+            CXX: ccache clang++
+            version: macos-10.15-clang
+            osp: macos
+            experimental: true
     runs-on: ${{ matrix.os }}
     env:
       CC: ${{ matrix.CC }}
@@ -44,7 +53,7 @@ jobs:
           pip install meson
 
       - name: Install dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-18.04'
+        if: matrix.osp == 'ubuntu'
         run: |
           sudo apt-get update
           sudo -E apt-get -yq install ccache ninja-build
@@ -61,7 +70,7 @@ jobs:
           ccache --version
 
       - name: Install dependencies (mac)
-        if: matrix.os == 'macos-10.15'
+        if: matrix.osp == 'macos'
         run: |
           brew install -q ninja nasm ccache
 
@@ -72,7 +81,7 @@ jobs:
       - name: get vmaf source 
         working-directory: ${{ github.workspace }}
         run: | 
-          /usr/bin/git clone https://github.com/Netflix/vmaf.git vmaf
+          /usr/bin/git clone https://github.com/Netflix/vmaf.git --branch  v2.1.1 --depth 1
       
       #- name: Run meson
       #  working-directory: ${{github.workspace}}
@@ -88,27 +97,13 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           sudo mkdir libvmaf
-          tar czvf "libvmaf-${{ matrix.os }}.tar.gz" libvmaf
-
-      - name: Get binary path & Current Release
-        id: get_info
-        run: |
-          ls -R ${{ github.workspace }}
-          echo "::set-output name=path::${{ github.workspace }}/libvmaf-${{ matrix.os }}.tar.gz"
-
-      - uses: actions/create-release@v1
-        id: create-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: libvmaf-master
-          release_name: libvmaf Build master
+          tar czvf "libvmaf-${{ matrix.version }}.tar.gz" libvmaf
       
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/libvmaf-${{ matrix.os }}.tar.gz
+          upload_url: https://uploads.github.com/repos/wangwei1237/setup-vmaf/releases/41691505/assets{?name,label}
+          asset_path: ${{ github.workspace }}/libvmaf-${{ matrix.version }}.tar.gz
           asset_name: libvmaf-${{ matrix.os }}.tar.gz
           asset_content_type: application/octet-stream
