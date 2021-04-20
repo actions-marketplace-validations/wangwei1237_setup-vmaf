@@ -83,15 +83,15 @@ jobs:
         run: | 
           /usr/bin/git clone https://github.com/Netflix/vmaf.git --branch  v2.1.1 --depth 1
       
-      #- name: Run meson
-      #  working-directory: ${{github.workspace}}
-      #  run: |
-      #    meson setup vmaf/libvmaf/build vmaf/libvmaf --buildtype release --prefix ${{github.workspace}}/libvmaf -Denable_float=true
+      - name: Run meson
+        working-directory: ${{github.workspace}}
+        run: |
+          meson setup vmaf/libvmaf/build vmaf/libvmaf --buildtype release --prefix ${{github.workspace}}/libvmaf -Denable_float=true
       
-      #- name: Run ninja
-      #  working-directory: ${{github.workspace}}
-      #  run: |
-      #    sudo ninja -vC vmaf/libvmaf/build install
+      - name: Run ninja
+        working-directory: ${{github.workspace}}
+        run: |
+          sudo ninja -vC vmaf/libvmaf/build install
       
       - name: package the libvmaf
         working-directory: ${{ github.workspace }}
