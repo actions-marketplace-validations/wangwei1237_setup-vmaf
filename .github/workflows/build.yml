@@ -105,5 +105,5 @@ jobs:
         with:
           upload_url: https://uploads.github.com/repos/wangwei1237/setup-vmaf/releases/41691505/assets{?name,label}
           asset_path: ${{ github.workspace }}/libvmaf-${{ matrix.version }}.tar.gz
-          asset_name: libvmaf-${{ matrix.os }}.tar.gz
+          asset_name: libvmaf-${{ matrix.version }}.tar.gz
           asset_content_type: application/octet-stream
