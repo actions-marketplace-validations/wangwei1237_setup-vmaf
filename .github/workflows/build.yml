@@ -16,14 +16,14 @@ jobs:
             CC: ccache gcc
             CXX: ccache g++
             version: master
-          - os: ubuntu-18.04
-            CC: ccache gcc-9
-            CXX: ccache g++-9
-            version: master
-          - os: ubuntu-18.04
-            CC: ccache clang
-            CXX: ccache clang++
-            version: master
+          #- os: ubuntu-18.04
+          #  CC: ccache gcc-9
+          #  CXX: ccache g++-9
+          #  version: master
+          #- os: ubuntu-18.04
+          #  CC: ccache clang
+          #  CXX: ccache clang++
+          #  version: master
           - os: macos-10.15
             CC: ccache clang
             CXX: ccache clang++
@@ -70,7 +70,7 @@ jobs:
           ccache --version
       
       - name: get vmaf source 
-        working-directory: ${{github.workspace}}
+        working-directory: ${{ github.workspace }}
         run: | 
           /usr/bin/git clone https://github.com/Netflix/vmaf.git vmaf
       
@@ -85,24 +85,24 @@ jobs:
       #    sudo ninja -vC vmaf/libvmaf/build install
       
       - name: package the libvmaf
-        working-directory: ${{github.workspace}}
+        working-directory: ${{ github.workspace }}
         run: |
           sudo mkdir libvmaf
-          tar czvf "libvmaf-${{matrix.os}}-${{matrix.CC}}.tar.gz" libvmaf
+          tar czvf "libvmaf-${{ matrix.os }}.tar.gz" libvmaf
 
       - name: Get binary path & Current Release
         id: get_info
         run: |
-          ls -R ${{github.workspace}}/libvmaf
-          echo "::set-output name=file::libvmaf-${{matrix.os}}-${{matrix.CC}}.tar.gz"
-          echo "::set-output name=path::${{github.workspace}}/libvmaf-${{matrix.os}}-${{matrix.CC}}.tar.gz"
+          ls -R ${{ github.workspace }}
+          echo "::set-output name=file::libvmaf-${{ matrix.os }}.tar.gz"
+          echo "::set-output name=path::${{ github.workspace }}/libvmaf-${{ matrix.os }}.tar.gz"
 
       - uses: actions/create-release@v1
         id: create-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: libvmaf-${{matrix.os}}-${{matrix.CC}}
+          tag_name: libvmaf-${{ matrix.os }}
           release_name: libvmaf Build master
       
       - uses: actions/upload-release-asset@v1
