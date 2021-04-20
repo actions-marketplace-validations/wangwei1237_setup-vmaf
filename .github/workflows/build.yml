@@ -25,7 +25,7 @@ jobs:
           - os: ubuntu-18.04
             CC: ccache clang
             CXX: ccache clang++
-            version: ubuntu-18.04-gcc
+            version: ubuntu-18.04-clang
             osp: ubuntu
           - os: ubuntu-20.04
             CC: ccache clang
