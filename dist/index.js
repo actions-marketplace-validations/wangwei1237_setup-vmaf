@@ -9840,7 +9840,7 @@ async function run() {
       const vmafPath = path.join(targetPath, '/bin/vmaf');
       await chmodx(vmafPath);
       assert.ok(await exec.exec(vmafPath, ['--version']) === 0);
-      core.addPath(vmafPath);
+      core.addPath(targetPath + '/bin');
       
       let pkgconfigPath = '';
       if (platform.startsWith('ubuntu')) {
