@@ -22,12 +22,14 @@ async function find(os, arch, options = {}) {
 // most @actions toolkit packages have async methods
 async function run() {
     try {
-      const platform = core.getInput('os');
-      const cc       = core.getInput('cc');
-      const version  = core.getInput('version');
-      const prefix   = core.getInput('prefix');
+      var platform = core.getInput('os');
+      var cc       = core.getInput('cc');
+      var version  = core.getInput('version').slice(1);
 
-      console.log(platform + ',' + arch);
+      platform = 'ubuntu-20.04';
+      cc = 'gcc';
+      version = 'v2.1.1'.slice(1);
+      console.log(platform + ',' + cc + ',' + version);
       const {version1, url} = await find(platform, arch);
       console.log('xsssss' + version1 + ',' + url);
 
@@ -40,23 +42,7 @@ async function run() {
       // await exec.exec('sudo -E apt-get -yq install gcc g++ nasm');
       core.endGroup();
 
-      core.startGroup('Download vmaf source code');
-      // await exec.exec(`git clone https://github.com/Netflix/vmaf.git --branch  ${version} --depth 1`);
-      core.endGroup();
       
-      core.startGroup('Compile and install');
-      const vmafPath       = './vmaf/libvmaf';
-      const vmafBuildPath  = './vmaf/libvmaf/build';
-      const setupCmd       = 'meson setup ' + 
-                             vmafBuildPath + ' ' +
-                             vmafPath + ' ' + 
-                             '--prefix=' + prefix;
-      const installCmd = 'ninja -vC ' + vmafBuildPath + ' install';
-      // await exec.exec(setupCmd);
-      // await exec.exec(installCmd);
-      // await exec.exec('ls -R .');
-      core.endGroup();
-
     } catch (error) {
       core.setFailed(error.message);
     }

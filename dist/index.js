@@ -9473,28 +9473,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 4345:
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __nccwpck_require__) => {
-
-const { Octokit } = __nccwpck_require__(3092);
-
-async function find(os, arch, options = {}) {
-    const owner   = 'wangwei1237';
-    const repo    = 'setup-vmaf';
-
-    const octokit = new Octokit();
-    const response = await octokit.repos.listReleases({ owner, repo });
-    const release = response.data.find(({ tag_name }) => tag_name.startsWith('libvmaf-'));
-    console.log('release-----------' + release.tag_name);
-    return {
-        release,
-        version: release.tag_name,
-        url: `https://github.com/${owner}/${repo}/releases/download/${release.tag_name}/libvmaf-${os}-${arch}.tar.gz`,
-    };
-}
-
-/***/ }),
-
 /***/ 1756:
 /***/ ((module) => {
 
@@ -9666,19 +9644,32 @@ const cache   = __nccwpck_require__(9898);
 const core    = __nccwpck_require__(8864);
 const exec    = __nccwpck_require__(8752);
 const octokit = __nccwpck_require__(3092);
-const os      = __nccwpck_require__(2087)
-const find   = __nccwpck_require__(4345);
+const { Octokit } = __nccwpck_require__(3092);
+
+async function find(os, arch, options = {}) {
+    const owner   = 'wangwei1237';
+    const repo    = 'setup-vmaf';
+
+    const octokit = new Octokit();
+    const response = await octokit.repos.listReleases({ owner, repo });
+    const release = response.data.find(({ tag_name }) => tag_name.startsWith('libvmaf-'));
+    console.log('release-----------' + release.tag_name);
+    return {
+        release,
+        version1: release.tag_name,
+        url: `https://github.com/${owner}/${repo}/releases/download/${release.tag_name}/libvmaf-${os}-${arch}.tar.gz`,
+    };
+}
 
 // most @actions toolkit packages have async methods
 async function run() {
     try {
-      const platform = os.platform();
-      const arch     = os.arch();
-      const version  = core.getInput('version');
-      const prefix   = core.getInput('prefix');
+      const platform = core.getInput('os');
+      const cc       = core.getInput('cc');
+      const version  = core.getInput('version').slice(1);
 
-      console.log(platform + ',' + arch);
-      const {version1, url} = await find('linux', arch);
+      console.log(platform + ',' + cc + ',' + version);
+      const {version1, url} = await find(platform, arch);
       console.log('xsssss' + version1 + ',' + url);
 
       core.startGroup('Install dependencies');
@@ -9690,23 +9681,7 @@ async function run() {
       // await exec.exec('sudo -E apt-get -yq install gcc g++ nasm');
       core.endGroup();
 
-      core.startGroup('Download vmaf source code');
-      // await exec.exec(`git clone https://github.com/Netflix/vmaf.git --branch  ${version} --depth 1`);
-      core.endGroup();
       
-      core.startGroup('Compile and install');
-      const vmafPath       = './vmaf/libvmaf';
-      const vmafBuildPath  = './vmaf/libvmaf/build';
-      const setupCmd       = 'meson setup ' + 
-                             vmafBuildPath + ' ' +
-                             vmafPath + ' ' + 
-                             '--prefix=' + prefix;
-      const installCmd = 'ninja -vC ' + vmafBuildPath + ' install';
-      // await exec.exec(setupCmd);
-      // await exec.exec(installCmd);
-      // await exec.exec('ls -R .');
-      core.endGroup();
-
     } catch (error) {
       core.setFailed(error.message);
     }
