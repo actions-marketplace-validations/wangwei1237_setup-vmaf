@@ -9849,6 +9849,11 @@ async function run() {
           pkgconfigPath = targetPath + '/lib/pkgconfig';
       }
 
+      // fix the include path for pkgconfig.
+      let pkgconfig = fs.readFileSync(pkgconfigPath + '/libvmaf.pc', 'utf8');
+      pkgconfig = pkgconfig.replace(/Cflags:.*/, 'Cflags: -I${includedir}');
+      fs.writeFileSync(pkgconfigPath + '/libvmaf.pc', pkgconfig, 'utf8');
+      
       console.log('pkgconfigPath: ' + pkgconfigPath);
       core.setOutput('libvmaf-path', targetPath);
       core.setOutput('pkgconfig-path', pkgconfigPath);
