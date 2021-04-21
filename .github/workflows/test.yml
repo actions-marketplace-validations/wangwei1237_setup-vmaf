@@ -7,6 +7,9 @@ jobs:
     steps:
       # To use this repository's private action,
       # you must check out the repository
+      - name: test
+        run: |
+          echo "the path is: ${${{github.workspace}}%/*/*}"
       - name: Checkout
         uses: actions/checkout@v2
       - name: Hello world action step
