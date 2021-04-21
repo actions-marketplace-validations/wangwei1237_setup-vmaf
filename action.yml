@@ -5,17 +5,13 @@ inputs:
     description: 'version of the vmaf, must be tags.'
     required: false
     default: 'v2.1.1'
-  prefix:
-    description: 'the prefix to install the vmaf'
-    required: false
-    default: ${{github.workspace}}../../libvmaf
   os:
     description: 'the os that build the libvmaf'
-    required: true
+    required: false
     default: ubuntu-20.04
   cc:
     description: 'the compiler that build the libvmaf'
-    required: true
+    required: false
     default: gcc
 runs:
   using: 'node12'

@@ -1,22 +1,18 @@
 on: [push]
 
 jobs:
-  hello_world_job:
-    runs-on: ubuntu-latest
-    name: A job to say hello
+  test_for_setup_vmaf_action:
+    runs-on: ubuntu-20.04
+    name: test for setup-vmaf action
     steps:
-      # To use this repository's private action,
-      # you must check out the repository
-      - name: test
-        run: |
-          echo "the path is: $(dirname $(dirname ${{github.workspace}}))"
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Hello world action step
+      - name: Setup-vmaf action step
         uses: ./ # Uses an action in the root directory
-        id: hello
+        id: setup-vmaf
       # Use the output from the `hello` step
-      - name: Get the output time
+      - name: Get the pkgconfig-path
         run: | 
-          echo "The time was ${{ steps.hello.outputs.time }}"
-          echo "the name was ${{ steps.hello.outputs.name }}"
+          echo "The libvmaf path: ${{ steps.setup-vmaf.outputs.libvmaf-path }}"
+          echo "The pkgconfig path: ${{ steps.setup-vmaf.outputs.pkgconfig-path }}"
+          ls -R ${{ steps.setup-vmaf.outputs.libvmaf-path }}

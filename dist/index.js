@@ -7421,6 +7421,142 @@ exports.Deprecation = Deprecation;
 
 /***/ }),
 
+/***/ 6736:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const { join, parse } = __nccwpck_require__(5622);
+const { access, mkdir, stat, unlink, readdir, rename, copyFile, rmdir } = __nccwpck_require__(5747).promises;
+const log = (m1, m2) => console.log(`[91m${m1}[0m${m2}`);
+
+async function mvdir(_src='', _dest='', _opts) {
+  let src  = typeof _src  === 'string' ? _src  : undefined;
+  let dest = typeof _dest === 'string' ? _dest : undefined;
+  const defOpts = { overwrite: true, copy: false, log: true };
+  const opts = isObj(_opts) ? Object.assign(defOpts, _opts) : defOpts;
+  let msg;
+  // are src and dest arguments valid?
+  if (!src || !dest) {
+    msg = 'Invalid argument(s).';
+    if (opts.log) log(msg);
+    return new CustomError(1, msg);
+  }
+  
+  // does src exist?
+  if ( !await exists(src) ) {
+    msg = ['No such file or directory: ', src];
+    if (opts.log) log(...msg);
+    return new CustomError(2, ...msg);
+  }
+  
+  // src exists.
+  // if src is a file:
+  const srcStats = await stat(src);
+  if ( !srcStats.isDirectory() ) {
+    // does dest exists?
+    if ( await exists(dest) ) {
+      if (!opts.overwrite) {
+        msg = ['Destination already exists: ', dest];
+        if (opts.log) log(...msg);
+        return new CustomError(3, ...msg);
+      }
+      const destStats = await stat(dest);
+      if ( destStats.isDirectory() ) dest = join(dest, parse(src).base); // dest is a folder.
+      await moveFile(src, dest, opts.copy);
+      return;
+    }
+    // dest doesn't exist.
+    const destDir = parse(dest).dir;
+    if ( destDir && !await exists(destDir) ) await mkdir(destDir, { recursive: true }); // dest folder(s) don't exist.
+    await moveFile(src, dest, opts.copy);
+    return;
+  }
+  
+  // src is a folder.
+  // does dest exist?
+  if ( await exists(dest) ) {
+    if (!opts.overwrite) {
+      msg = ['Destination already exists: ', dest];
+      if (opts.log) log(...msg);
+      return new CustomError(3, ...msg);
+    }
+  } else {
+    await mkdir(dest, { recursive: true });
+  }
+  
+  // dest exists.
+  // if dest is a file:
+  const destStats = await stat(dest);
+  if ( !destStats.isDirectory() ) {
+    if (!opts.overwrite) {
+      msg = ['Destination is an existing file: ', dest];
+      if (opts.log) log(...msg);
+      return new CustomError(4, ...msg);
+    } else {
+      await unlink(dest);
+      await mkdir(dest);
+    }
+  }
+  
+  // src and dest are both folders.
+  const files = await readdir(src);
+  for (const file of files) {
+    const ferom = join(src, file);
+    const to = join(dest, file);
+    const stats = await stat(ferom);
+    if ( stats.isDirectory() ) {
+      await mvdir(ferom, to, opts);
+    } else {
+      await moveFile(ferom, to, opts.copy);
+    }
+  }
+  if (!opts.copy) await rmdir(src);
+  return;
+};
+
+async function moveFile(src, dest, copy) {
+  if (copy) {
+    await copyFile(src, dest);
+    return;
+  }
+  await rename(src, dest).catch(async err => {
+    if (err.code === 'EXDEV') {
+      await copyFile(src, dest);
+      await unlink(src);
+    }
+  });
+}
+
+async function exists(path) {
+  let res = true;
+  await access(path).catch(err => res = false);
+  return res;
+}
+
+function isObj(v) {
+  return (
+    v &&
+    typeof v === 'object' &&
+    typeof v !== null &&
+    Object.prototype.toString.call(v) === '[object Object]'
+  ) ? true : false;
+}
+
+class CustomError {
+  constructor(code, m1, m2) {
+    let str = '';
+    str += m1 || '';
+    str += m2 || '';
+    this.code = code;
+    this.message = str;
+  }
+}
+
+module.exports = mvdir;
+
+
+
+/***/ }),
+
 /***/ 5597:
 /***/ ((module, exports, __nccwpck_require__) => {
 
@@ -9640,50 +9776,84 @@ module.exports = require("zlib");;
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-const cache   = __nccwpck_require__(9898);
-const core    = __nccwpck_require__(8864);
-const exec    = __nccwpck_require__(8752);
-const octokit = __nccwpck_require__(3092);
+const assert      = __nccwpck_require__(2357);
+const core        = __nccwpck_require__(8864);
+const exec        = __nccwpck_require__(8752);
+const fs          = __nccwpck_require__(5747);
+const mvdir       = __nccwpck_require__(6736);
+const path        = __nccwpck_require__(5622);
+const tc          = __nccwpck_require__(9898);
 const { Octokit } = __nccwpck_require__(3092);
 
-async function find(os, arch, options = {}) {
+const chmodx = (path) => fs.promises.chmod(path, '755');
+
+async function find(version, os, cc, options = {}) {
     const owner   = 'wangwei1237';
     const repo    = 'setup-vmaf';
 
-    const octokit = new Octokit();
+    const octokit  = new Octokit({ auth: options.token });
     const response = await octokit.repos.listReleases({ owner, repo });
-    const release = response.data.find(({ tag_name }) => tag_name.startsWith('libvmaf-'));
-    console.log('release-----------' + release.tag_name);
+    const release  = response.data.find(({ tag_name }) => tag_name.startsWith('libvmaf-' + version));
+
+    if (!release) {
+        return {release, tag: '', url: ''};
+    } 
+
     return {
         release,
-        version1: release.tag_name,
-        url: `https://github.com/${owner}/${repo}/releases/download/${release.tag_name}/libvmaf-${os}-${arch}.tar.gz`,
+        tag: release.tag_name,
+        url: `https://github.com/${owner}/${repo}/releases/download/${release.tag_name}/libvmaf-${os}-${cc}.tar.gz`,
     };
 }
 
 // most @actions toolkit packages have async methods
 async function run() {
     try {
+      const token = [process.env.INPUT_TOKEN, process.env.INPUT_GITHUB_TOKEN, process.env.GITHUB_TOKEN]
+      .filter((token) => token)[0];
+
       const platform = core.getInput('os');
       const cc       = core.getInput('cc');
       const version  = core.getInput('version').slice(1);
 
-      console.log(platform + ',' + cc + ',' + version);
-      const {version1, url} = await find(platform, arch);
-      console.log('xsssss' + version1 + ',' + url);
+      const {tag, url} = await find(version, platform, cc, { token });
+      if (!tag) {
+          console.log('can not find libvmaf-' + version + ', please contact the author of setup-vmaf actions.');
+          throw('can not find libvmaf-' + version + ', please contact the author of setup-vmaf actions.');
+      } 
 
-      core.startGroup('Install dependencies');
-      await exec.exec(`echo ${platform} ${arch}`);
-      // await exec.exec(`python -m pip install --upgrade pip`);
-      // await exec.exec(`pip install meson`);
-      // await exec.exec('sudo apt-get update');
-      // await exec.exec('sudo -E apt-get -yq install ccache ninja-build');
-      // await exec.exec('sudo -E apt-get -yq install gcc g++ nasm');
-      core.endGroup();
-
+      // Search in the cache if version is already installed
+      let installPath = tc.find('libvmaf', version, platform + '-' + cc);
       
+      if (!installPath) {
+          const downloadPath = await tc.downloadTool(url, void 0, token);
+          const extractPath  = await tc.extractTar(downloadPath);
+          installPath        = await tc.cacheDir(extractPath, 'libvmaf', version, platform + '-' + cc);
+      }
+    
+      assert.ok(installPath);
+
+      console.log('mv the libvmaf to path: ${{github.workspace}}/../../');
+      const targetPath = '../../libvmaf';
+      await mvdir(installPath + '/libvmaf', targetPath, {copy: true});
+      
+      const vmafPath = path.join(targetPath, 'bin/vmaf');
+      await chmodx(vmafPath);
+      assert.ok(await exec.exec(vmafPath, ['--version']) === 0);
+      core.addPath(vmafPath);
+      
+      let pkgconfigPath = '';
+      if (platform.startsWith('ubuntu')) {
+          pkgconfigPath = targetPath + '/lib/x86_64-linux-gnu/pkgconfig';
+      } else if (platform.startsWith('macos')) {
+          pkgconfigPath = targetPath + '/lib/pkgconfig';
+      }
+
+      console.log('pkgconfigPath: ' + pkgconfigPath);
+      core.setOutput('libvmaf-path', targetPath);
+      core.setOutput('pkgconfig-path', pkgconfigPath);
     } catch (error) {
-      core.setFailed(error.message);
+        core.setFailed(error.message);
     }
 }
 
