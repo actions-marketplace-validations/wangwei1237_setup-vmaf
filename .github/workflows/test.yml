@@ -13,6 +13,7 @@ jobs:
       # Use the output from the `hello` step
       - name: Get the pkgconfig-path
         run: | 
+          vmaf --version
           echo "The libvmaf path: ${{ steps.setup-vmaf.outputs.libvmaf-path }}"
           echo "The pkgconfig path: ${{ steps.setup-vmaf.outputs.pkgconfig-path }}"
           ls -R ${{ steps.setup-vmaf.outputs.libvmaf-path }}
