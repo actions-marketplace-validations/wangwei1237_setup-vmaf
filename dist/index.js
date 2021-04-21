@@ -9837,7 +9837,7 @@ async function run() {
       const targetPath = '../../libvmaf';
       await mvdir(installPath + '/libvmaf', targetPath, {copy: true});
       
-      const vmafPath = path.join(targetPath, 'bin/vmaf');
+      const vmafPath = path.join(targetPath, '/bin/vmaf');
       await chmodx(vmafPath);
       assert.ok(await exec.exec(vmafPath, ['--version']) === 0);
       core.addPath(vmafPath);
