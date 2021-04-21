@@ -104,7 +104,7 @@ jobs:
       - name: Run meson
         working-directory: ${{github.workspace}}
         run: |
-          meson setup vmaf/libvmaf/build vmaf/libvmaf --buildtype release --prefix ${{github.workspace}}/libvmaf -Denable_float=true
+          meson setup vmaf/libvmaf/build vmaf/libvmaf --buildtype release --prefix ${{github.workspace}}/../../libvmaf -Denable_float=true
       
       - name: Run ninja
         working-directory: ${{github.workspace}}
@@ -112,7 +112,7 @@ jobs:
           sudo ninja -vC vmaf/libvmaf/build install
       
       - name: package the libvmaf
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/../../
         run: |
           tar czvf "libvmaf-${{ matrix.version }}.tar.gz" libvmaf
       
@@ -121,6 +121,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.get-upload-url.outputs.upload-url }}
-          asset_path: ${{ github.workspace }}/libvmaf-${{ matrix.version }}.tar.gz
+          asset_path: ${{ github.workspace }}/../../libvmaf-${{ matrix.version }}.tar.gz
           asset_name: libvmaf-${{ matrix.version }}.tar.gz
           asset_content_type: application/octet-stream
