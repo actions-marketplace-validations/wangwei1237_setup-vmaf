@@ -9,7 +9,7 @@ jobs:
       # you must check out the repository
       - name: test
         run: |
-          echo "the path is: dirname $(dirname ${{github.workspace}})"
+          echo "the path is: $(dirname $(dirname ${{github.workspace}}))"
       - name: Checkout
         uses: actions/checkout@v2
       - name: Hello world action step
