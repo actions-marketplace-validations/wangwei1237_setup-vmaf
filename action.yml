@@ -1,5 +1,8 @@
 name: 'Setup VMAF'
 description: 'Setup VMAF'
+branding:
+  icon: 'anchor'  
+  color: 'green'
 inputs:
   version: 
     description: 'version of the vmaf, must be tags.'
