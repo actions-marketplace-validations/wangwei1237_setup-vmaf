@@ -2,7 +2,6 @@ const cache   = require('@actions/tool-cache');
 const core    = require('@actions/core');
 const exec    = require('@actions/exec');
 const octokit = require('@octokit/rest');
-const os      = require('os')
 const { Octokit } = require("@octokit/rest");
 
 async function find(os, arch, options = {}) {
@@ -23,8 +22,8 @@ async function find(os, arch, options = {}) {
 // most @actions toolkit packages have async methods
 async function run() {
     try {
-      const platform = os.platform();
-      const arch     = os.arch();
+      const platform = core.getInput('os');
+      const cc       = core.getInput('cc');
       const version  = core.getInput('version');
       const prefix   = core.getInput('prefix');
 

@@ -8,7 +8,15 @@ inputs:
   prefix:
     description: 'the prefix to install the vmaf'
     required: false
-    default: ${{github.workspace}}/libvmaf
+    default: ${{github.workspace}}../../libvmaf
+  os:
+    description: 'the os that build the libvmaf'
+    required: true
+    default: ubuntu-20.04
+  cc:
+    description: 'the compiler that build the libvmaf'
+    required: true
+    default: gcc
 runs:
   using: 'node12'
   main: 'dist/index.js'
