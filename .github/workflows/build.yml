@@ -26,6 +26,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - os: ubuntu-16.04
+            CC: ccache gcc
+            CXX: ccache g++
+            version: ubuntu-16.04-gcc
+            osp: ubuntu
           - os: ubuntu-18.04
             CC: ccache gcc
             CXX: ccache g++
